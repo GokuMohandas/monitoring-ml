@@ -1,6 +1,6 @@
 # Monitoring ML
 
-Learn how to monitor ML systems to identify and mitigate sources of drift before model performance decay.
+Learn how to monitor ML systems to identify and address sources of drift before model performance decay.
 
 <div align="left">
     <a target="_blank" href="https://newsletter.madewithml.com"><img src="https://img.shields.io/badge/Subscribe-30K-brightgreen"></a>&nbsp;
@@ -12,7 +12,15 @@ Learn how to monitor ML systems to identify and mitigate sources of drift before
 
 <br>
 
-👉 &nbsp;This repository is an isolated version of the much more comprehensive [monitoring lesson](https://madewithml.com/courses/mlops/monitoring/), which is a part of our free [mlops course](https://madewithml.com/). Use this repository to learn how to monitor ML systems but be sure to explore the [mlops-course](https://github.com/GokuMohandas/mlops-course) repository to learn how to tie monitoring workflows with all the other parts of ML system development.
+👉 &nbsp;This repository contains the [interactive notebook](https://colab.research.google.com/github/GokuMohandas/monitoring-ml/blob/main/monitoring.ipynb) that complements the [monitoring lesson](https://madewithml.com/courses/mlops/monitoring/), which is a part of the [MLOps course](https://github.com/GokuMohandas/mlops-course). If you haven't already, be sure to check out the [lesson](https://madewithml.com/courses/mlops/monitoring/) because all the concepts are covered extensively and tied to software engineering best practices for building ML systems.
+
+<div align="left">
+<a target="_blank" href="https://madewithml.com/courses/mlops/monitoring/"><img src="https://img.shields.io/badge/📖 Read-lesson-9cf"></a>&nbsp;
+<a href="https://github.com/GokuMohandas/monitoring-ml/blob/main/monitoring.ipynb" role="button"><img src="https://img.shields.io/static/v1?label=&amp;message=View%20On%20GitHub&amp;color=586069&amp;logo=github&amp;labelColor=2f363d"></a>&nbsp;
+<a href="https://colab.research.google.com/github/GokuMohandas/monitoring-ml/blob/main/monitoring.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"></a>
+</div>
+
+<br>
 
 - [Performance](#performance)
 - [Drift](#drift)
@@ -25,8 +33,6 @@ Learn how to monitor ML systems to identify and mitigate sources of drift before
     - [Univariate](#univariate)
     - [Multivariate](#multivariate)
 - [Online](#online)
-
-📓 &nbsp;Run all the code without any setup via our [interactive notebook](https://colab.research.google.com/github/GokuMohandas/mlops-course/blob/main/notebooks/monitoring.ipynb).
 
 ## Performance
 
@@ -99,6 +105,7 @@ Data drift, also known as feature drift or covariate shift, occurs when the dist
     <small>Data drift can occur in either continuous or categorical features.</small>
 </div>
 
+
 ### Target drift
 
 Besides just the input data changing, as with data drift, we can also experience drift in our outcomes. This can be a shift in the distributions but also the removal or addition of new classes with categorical tasks. Though retraining can mitigate the performance decay caused target drift, it can often be avoided with proper inter-pipeline communication about new classes, schema changes, etc.
@@ -110,6 +117,8 @@ Besides the input and output data drifting, we can have the actual relationship 
 <div class="ai-center-all">
     <img width="500" src="https://madewithml.com/static/images/mlops/monitoring/concept_drift.png" alt="concept drift">
 </div>
+
+<br>
 
 - gradually over a period of time
 - abruptly as a result of an external event
@@ -215,22 +224,25 @@ expectation_suite = df.get_expectation_suite()
 # Validate reference data
 df.validate(expectation_suite=expectation_suite, only_return_failures=True)["statistics"]
 ```
-<pre class="output">
-{'evaluated_expectations': 2,
- 'success_percent': 100.0,
- 'successful_expectations': 2,
- 'unsuccessful_expectations': 0}
-</pre>
+
+```json
+{"evaluated_expectations": 2,
+ "success_percent": 100.0,
+ "successful_expectations": 2,
+ "unsuccessful_expectations": 0}
+```
+
 ```python
 # Validate production data
 prod_df.validate(expectation_suite=expectation_suite, only_return_failures=True)["statistics"]
 ```
-<pre class="output">
-{'evaluated_expectations': 2,
- 'success_percent': 50.0,
- 'successful_expectations': 1,
- 'unsuccessful_expectations': 1}
-</pre>
+
+```json
+{"evaluated_expectations": 2,
+ "success_percent": 50.0,
+ "successful_expectations": 1,
+ "unsuccessful_expectations": 1}
+```
 
 Once we've validated our rule-based expectations, we need to quantitatively measure drift across the different features in our data.
 
@@ -272,21 +284,22 @@ plt.show()
 <div class="ai-center-all">
     <img width="500" src="https://madewithml.com/static/images/mlops/monitoring/ks_no_drift.png" alt="no drift with KS test">
 </div>
+<br>
 
 ```python
 length_drift_detector.predict(no_drift, return_p_val=True, return_distance=True)
 ```
 
-<pre class="output">
-{'data': {'distance': array([0.09], dtype=float32),
-  'is_drift': 0,
-  'p_val': array([0.3927307], dtype=float32),
-  'threshold': 0.01},
- 'meta': {'data_type': None,
-  'detector_type': 'offline',
-  'name': 'KSDrift',
-  'version': '0.9.1'}}
-</pre>
+```json
+{"data": {"distance": array([0.09], dtype=float32),
+  "is_drift": 0,
+  "p_val": array([0.3927307], dtype=float32),
+  "threshold": 0.01},
+ "meta": {"data_type": None,
+  "detector_type": "offline",
+  "name": "KSDrift",
+  "version": "0.9.1"}}
+```
 
 > &darr; p-value = &uarr; confident that the distributions are different.
 
@@ -302,21 +315,22 @@ plt.show()
 <div class="ai-center-all">
     <img width="500" src="https://madewithml.com/static/images/mlops/monitoring/ks_drift.png" alt="drift detection with KS">
 </div>
+<br>
 
 ```python
 length_drift_detector.predict(drift, return_p_val=True, return_distance=True)
 ```
 
-<pre class="output">
-{'data': {'distance': array([0.63], dtype=float32),
-  'is_drift': 1,
-  'p_val': array([6.7101775e-35], dtype=float32),
-  'threshold': 0.01},
- 'meta': {'data_type': None,
-  'detector_type': 'offline',
-  'name': 'KSDrift',
-  'version': '0.9.1'}}
-</pre>
+```json
+{"data": {"distance": array([0.63], dtype=float32),
+  "is_drift": 1,
+  "p_val": array([6.7101775e-35], dtype=float32),
+  "threshold": 0.01},
+ "meta": {"data_type": None,
+  "detector_type": "offline",
+  "name": "KSDrift",
+  "version": "0.9.1"}}
+```
 
 #### Chi-squared test
 
@@ -353,21 +367,22 @@ plt.show()
 <div class="ai-center-all">
     <img width="500" src="https://madewithml.com/static/images/mlops/monitoring/chi_no_drift.png" alt="no drift with chi squared test">
 </div>
+<br>
 
 ```python
 target_drift_detector.predict(no_drift, return_p_val=True, return_distance=True)
 ```
 
-<pre class="output">
-{'data': {'distance': array([4.135522], dtype=float32),
-  'is_drift': 0,
-  'p_val': array([0.12646863], dtype=float32),
-  'threshold': 0.01},
- 'meta': {'data_type': None,
-  'detector_type': 'offline',
-  'name': 'ChiSquareDrift',
-  'version': '0.9.1'}}
-</pre>
+```json
+{"data": {"distance": array([4.135522], dtype=float32),
+  "is_drift": 0,
+  "p_val": array([0.12646863], dtype=float32),
+  "threshold": 0.01},
+ "meta": {"data_type": None,
+  "detector_type": "offline",
+  "name": "ChiSquareDrift",
+  "version": "0.9.1"}}
+```
 
 ```python
 # Drift
@@ -381,20 +396,21 @@ plt.show()
 <div class="ai-center-all">
     <img width="500" src="https://madewithml.com/static/images/mlops/monitoring/chi_drift.png" alt="drift detection with chi squared tests">
 </div>
+<br>
 
 ```python
 target_drift_detector.predict(drift, return_p_val=True, return_distance=True)
 ```
 
-<pre class="output">
-{'data': {'is_drift': 1,
-  'distance': array([118.03355], dtype=float32),
-  'p_val': array([2.3406739e-26], dtype=float32),
-  'threshold': 0.01},
- 'meta': {'name': 'ChiSquareDrift',
-  'detector_type': 'offline',
-  'data_type': None}}
-</pre>
+```json
+{"data": {"is_drift": 1,
+  "distance": array([118.03355], dtype=float32),
+  "p_val": array([2.3406739e-26], dtype=float32),
+  "threshold": 0.01},
+ "meta": {"name": "ChiSquareDrift",
+  "detector_type": "offline",
+  "data_type": None}}
+```
 
 ### Multivariate
 
@@ -547,18 +563,18 @@ no_drift = df.text[200:400].to_list()
 mmd_drift_detector.predict(no_drift)
 ```
 
-<pre class="output">
-{'data': {'distance': 0.0021169185638427734,
-  'distance_threshold': 0.0032651424,
-  'is_drift': 0,
-  'p_val': 0.05999999865889549,
-  'threshold': 0.01},
- 'meta': {'backend': 'pytorch',
-  'data_type': None,
-  'detector_type': 'offline',
-  'name': 'MMDDriftTorch',
-  'version': '0.9.1'}}
-</pre>
+```json
+{"data": {"distance": 0.0021169185638427734,
+  "distance_threshold": 0.0032651424,
+  "is_drift": 0,
+  "p_val": 0.05999999865889549,
+  "threshold": 0.01},
+ "meta": {"backend": "pytorch",
+  "data_type": None,
+  "detector_type": "offline",
+  "name": "MMDDriftTorch",
+  "version": "0.9.1"}}
+```
 
 ```python
 # Drift
@@ -566,18 +582,18 @@ drift = ["UNK " + text for text in no_drift]
 mmd_drift_detector.predict(drift)
 ```
 
-<pre class="output">
-{'data': {'distance': 0.014705955982208252,
-  'distance_threshold': 0.003908038,
-  'is_drift': 1,
-  'p_val': 0.0,
-  'threshold': 0.01},
- 'meta': {'backend': 'pytorch',
-  'data_type': None,
-  'detector_type': 'offline',
-  'name': 'MMDDriftTorch',
-  'version': '0.9.1'}}
-</pre>
+```json
+{"data": {"distance": 0.014705955982208252,
+  "distance_threshold": 0.003908038,
+  "is_drift": 1,
+  "p_val": 0.0,
+  "threshold": 0.01},
+ "meta": {"backend": "pytorch",
+  "data_type": None,
+  "detector_type": "offline",
+  "name": "MMDDriftTorch",
+  "version": "0.9.1"}}
+```
 
 ## Online
 
